@@ -1,8 +1,3 @@
-#define RL_TOOLS_BACKEND_ENABLE_OPENBLAS
-#include <rl_tools/operations/cpu_mux.h>
-#include <rl_tools/nn/operations_cpu_mux.h>
-#include <rl_tools/nn_models/operations_cpu.h>
-
 namespace rlt = rl_tools;
 template <typename T>
 struct MyFurutaParameters {
@@ -39,5 +34,6 @@ struct MyFuruta{
     using TI = typename SPEC::TI;
     using State = MyFurutaState<T, TI>;
     static constexpr TI OBSERVATION_DIM = 3;
+    static constexpr TI OBSERVATION_DIM_PRIVILEGED = OBSERVATION_DIM;
     static constexpr TI ACTION_DIM = 1;
 };

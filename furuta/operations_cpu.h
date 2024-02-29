@@ -1,4 +1,4 @@
-
+namespace rlt = rl_tools;
 template <typename T>
 T clip(T x, T min, T max){
     x = x < min ? min : (x > max ? max : x);
@@ -18,7 +18,7 @@ namespace rl_tools{
     template<typename DEVICE, typename SPEC>
     static void malloc(DEVICE& device, const MyFuruta<SPEC>& env){}
     template<typename DEVICE, typename SPEC>
-    static void init(DEVICE& device, const MyFuruta<SPEC>& env){}
+    static void init(DEVICE& device, const MyFuruta<SPEC>& env){std::cout << "Initting CPU based operations";}
     template<typename DEVICE, typename SPEC, typename RNG>
     static void sample_initial_state(DEVICE& device, const MyFuruta<SPEC>& env, typename MyFuruta<SPEC>::State& state, RNG& rng){
         state.theta     = random::uniform_real_distribution(typename DEVICE::SPEC::RANDOM(), SPEC::PARAMETERS::INITIAL_STATE_MIN_ANGLE, SPEC::PARAMETERS::INITIAL_STATE_MAX_ANGLE, rng);
