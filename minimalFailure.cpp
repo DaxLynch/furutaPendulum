@@ -13,7 +13,7 @@
 
 namespace rlt = rl_tools;
 
-using DEVICE = rlt::devices::DefaultCPU;
+using DEVICE = rlt::devices::DEVICE_FACTORY<>;
 using T = float;
 using TI = typename DEVICE::index_t;
 using RNG = decltype(rlt::random::default_engine(typename DEVICE::SPEC::RANDOM{}));
