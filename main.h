@@ -21,4 +21,12 @@
 #include <rl_tools/rl/loop/steps/evaluation/operations_generic.h>
 #include <rl_tools/rl/loop/steps/timing/operations_cpu.h>
 
+#include "furuta/loop.h"
+
+typedef struct dataToBeSent {
+    int encPos;
+    float encVel;
+} dati;
+dati datum;
+
 
