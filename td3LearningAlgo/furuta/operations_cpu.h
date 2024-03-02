@@ -85,14 +85,8 @@ namespace rl_tools{
         typedef typename SPEC::PARAMETERS PARAMS;
 	//What if the state included the time, and the did the action, waited until eval was over,
         T u_normalised = get(action, 0, 0); //Action not based on current state 
-          T u = PARAMS::MAX_TORQUE * u_normalised;
-        T g = PARAMS::G;
-        T m = PARAMS::M;
-        T l = PARAMS::L;
-        T dt = PARAMS::DT;
-
-        u = clip(u, -PARAMS::MAX_TORQUE, PARAMS::MAX_TORQUE);
- 
+   
+//---
         T newthdot = state.theta_dot + (3 * g / (2 * l) * rlt::math::sin(device.math, state.theta) + 3.0 / (m * l * l) * u) * dt;
         newthdot = clip(newthdot, -PARAMS::MAX_SPEED, PARAMS::MAX_SPEED);
         T newth = state.theta + newthdot * dt;
@@ -106,7 +100,6 @@ namespace rl_tools{
         typedef typename SPEC::T T;
         T angle_norm = angle_normalize(device.math, state.theta);
         T u_normalised = get(action, 0, 0);
-	
         T u = SPEC::PARAMETERS::MAX_TORQUE * u_normalised;
         T costs = angle_norm * angle_norm + 0.1 * state.theta_dot * state.theta_dot + 0.001 * (u * u);
         return -costs;

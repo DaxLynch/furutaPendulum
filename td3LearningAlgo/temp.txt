@@ -1,0 +1,8 @@
+
+#include "td3CoreConfig.h"
+#include "loopEvalConfig.h"
+#include "timingConfig.h"
+#include "td3LoopOps.h"
+#include "loopEvalOps.h"
+#include "loopTimingOps.h"
+
