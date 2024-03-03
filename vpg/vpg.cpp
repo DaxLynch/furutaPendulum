@@ -2,41 +2,26 @@
 
 #include <chrono>
 
-#include <rl_tools/operations/cpu_mux.h>
-#include <rl_tools/nn/operations_cpu_mux.h>
-
-#include <rl_tools/operations/cpu.h>
-#include <rl_tools/nn/layers/dense/operations_cpu.h>
-
-#include <rl_tools/nn_models/mlp/operations_cpu.h>
-
-
 #include "furuta/furuta.h"
 
-namespace rlt = rl_tools;
 using namespace std;
 
-using T = float;
-using DEVICE = rlt::devices::DEVICE_FACTORY<>;
-using TI = typename DEVICE::index_t;
 auto rng = rlt::random::default_engine(typename DEVICE::SPEC::RANDOM{}, 1);
 DEVICE device;
 
-constexpr TI BATCH_SIZE = 5000;
-constexpr TI INPUT_DIM_MLP = 2;
-constexpr TI OUTPUT_DIM_MLP = 1;
-constexpr TI NUM_LAYERS = 1;
-constexpr TI HIDDEN_DIM = 32;
-constexpr auto ACTIVATION_FUNCTION_MLP = rlt::nn::activation_functions::RELU;
-constexpr auto OUTPUT_ACTIVATION_FUNCTION_MLP = rlt::nn::activation_functions::IDENTITY;
-using N_ITERS=50;
 
-using STRUCTURE_SPEC = rlt::nn_models::mlp::StructureSpecification<T, DEVICE::index_t, INPUT_DIM_MLP, OUTPUT_DIM_MLP, NUM_LAYERS, HIDDEN_DIM, ACTIVATION_FUNCTION_MLP, OUTPUT_ACTIVATION_FUNCTION_MLP, BATCH_SIZE>;
+RETURN_VECTOR pendulum(STATE_VECTOR state, T action){
+	T theta = rlt::random::uniform_real_distribution(typename DEVICE::SPEC::RANDOM(), -3.141419, 3.1415, rng);
+	T theta_dot = rlt::random::uniform_real_distribution(typename DEVICE::SPEC::RANDOM(), 5*-3.141419, 5*3.1415, rng);
+	return RETURN_VECTOR{theta,theta_dot,0,4};	
+};
+STATE_VECTOR pendulumInitialState(){
+	T theta = rlt::random::uniform_real_distribution(typename DEVICE::SPEC::RANDOM(), -3.141419, 3.1415, rng);
+	T theta_dot = rlt::random::uniform_real_distribution(typename DEVICE::SPEC::RANDOM(), 5*-3.141419, 5*3.1415, rng);
+	return STATE_VECTOR{theta,theta_dot};
+};
 
-using OPTIMIZER_SPEC = rlt::nn::optimizers::adam::Specification<T, TI>;
-using OPTIMIZER = rlt::nn::optimizers::Adam<OPTIMIZER_SPEC>;
-using MODEL_SPEC = rlt::nn_models::mlp::AdamSpecification<STRUCTURE_SPEC>;
-using MODEL_TYPE = rlt::nn_models::mlp::NeuralNetworkAdam<MODEL_SPEC>;
+
 
 int main() {
 OPTIMIZER optimizer;
@@ -49,62 +34,49 @@ rlt::zero_gradient(device, model); // recursively zeros all gradients in the lay
 rlt::reset_optimizer_state(device, optimizer, model);
 rlt::malloc(device, buffer);
 
-rlt::MatrixDynamic<rlt::matrix::Specification<T, TI, BATCH_SIZE, INPUT_DIM_MLP>> input_mlp, d_input_mlp;
+rlt::MatrixDynamic<rlt::matrix::Specification<T, TI, BATCH_SIZE, INPUT_DIM_MLP>> states, d_input_mlp;
+rlt::MatrixDynamic<rlt::matrix::Specification<T, TI, 1, INPUT_DIM_MLP>> state_input;
+rlt::MatrixDynamic<rlt::matrix::Specification<T, TI, BATCH_SIZE, 1>> dones;
+rlt::MatrixDynamic<rlt::matrix::Specification<T, TI, BATCH_SIZE, 1>> actions;
+rlt::MatrixDynamic<rlt::matrix::Specification<T, TI, BATCH_SIZE, 1>> rews;
 rlt::MatrixDynamic<rlt::matrix::Specification<T, TI, BATCH_SIZE, OUTPUT_DIM_MLP>> d_output_mlp;
-rlt::malloc(device, input_mlp);
+rlt::malloc(device, states);
+rlt::malloc(device, state_input);
+rlt::malloc(device, dones);
+rlt::malloc(device, actions);
+rlt::malloc(device, rews);
+
 rlt::malloc(device, d_input_mlp);
 rlt::malloc(device, d_output_mlp);
 
-rlt::randn(device, input_mlp, rng);
-rlt::forward(device, model, input_mlp);
-T output_value = get(model.output_layer.output, 0, 0);
-
-T target_output_value = 1;
-T error = target_output_value - output_value;
-rlt::set(d_output_mlp, 0, 0, -error);
-rlt::backward(device, model, input_mlp, d_output_mlp, buffer);
-rlt::step(device, optimizer, model);
-
-rlt::forward(device, model, input_mlp);
 auto start = std::chrono::high_resolution_clock::now();
-for(TI i=0; i < N_ITERS; i++){
-	//For loop fill the input batch with states, and actions
-	//Alocate input state
-	for(TI z = 0; x < BATCH_SIZE; z++){
-		//add traj state
-		rlt::forward(device, model, input_mlp);
-		T action = get(model.output_layer.output, 0, 0);
-		next_theta, next_theta_dot, done = pendulum(state,action);
-		
+STATE_VECTOR state;
+RETURN_VECTOR returnV; 
+T action;
+for(TI z = 0; z < BATCH_SIZE; z++){
+	if ((z == 0) || (returnV.done)){
+		state = pendulumInitialState();
 	}
-	//Compute rewards to go
-	
-	rlt::zero_gradient(device, model);
-	T mse = 0;
-	for(TI batch_i=0; batch_i < 32; batch_i++){
-		rlt::randn(device, input_mlp, rng); //Provide input from pendulum
-		rlt::forward(device, model, input_mlp);
-		T output_value = get(model.output_layer.output, 0, 0);
-		T target_output_value = rlt::max(device, input_mlp);
-		T error = target_output_value - output_value;
-	
-		rlt::set(d_output_mlp, 0, 0, -error);
-		rlt::backward(device, model, input_mlp, d_output_mlp, buffer);
-		mse += error * error;
-	}
-	rlt::step(device, optimizer, model);
-	if(i % 1000 == 0)
-	std::cout << "Squared error: " << mse/32 << std::endl;
+	cout << state.theta << " " << state.theta_dot;
+	set(state_input, 0,0, state.theta);
+	set(state_input, 0,1, state.theta_dot);
+
+	set(states, z, 0, state.theta);
+	set(states, z, 1, state.theta_dot);
+	rlt::forward(device, model, state_input);
+	action  = get(model.output_layer.output, 0, 0);
+	cout << "Action:" << action << endl; 
+	set(actions, z, 0, action);
+	returnV = pendulum(state,action);
+	state.theta = returnV.next_theta;
+	state.theta_dot = returnV.next_theta_dot;
+//	set(rews, z, 0, returnV.reward);
+//	set(dones, z, 0, returnV.done);
 }
+
 auto end = std::chrono::high_resolution_clock::now();
 auto duration = std::chrono::duration<double>(end - start);
 std::cout << "Time to run inference: " << duration.count() << " seconds" << std::endl;
-
-set(input_mlp, 0, 0, -0.1);
-set(input_mlp, 0, 1, +0.5);
-rlt::forward(device, model, input_mlp);
-cout << rlt::get(model.output_layer.output, 0, 0);
-
 cout << "kys" << endl;
 }
 
