@@ -14,7 +14,7 @@ using T = float;
 using DEVICE = rlt::devices::DEVICE_FACTORY<>;
 using TI = typename DEVICE::index_t;
 
-constexpr TI BATCH_SIZE = 5000;
+constexpr TI BATCH_SIZE = 10;
 constexpr TI INPUT_DIM_MLP = 2;
 constexpr TI OUTPUT_DIM_MLP = 1;
 constexpr TI NUM_LAYERS = 2;
@@ -23,7 +23,7 @@ constexpr auto ACTIVATION_FUNCTION_MLP = rlt::nn::activation_functions::RELU;
 constexpr auto OUTPUT_ACTIVATION_FUNCTION_MLP = rlt::nn::activation_functions::IDENTITY;
 constexpr TI N_ITERS=50;
 
-using STRUCTURE_SPEC = rlt::nn_models::mlp::StructureSpecification<T, DEVICE::index_t, INPUT_DIM_MLP, OUTPUT_DIM_MLP, NUM_LAYERS, HIDDEN_DIM, ACTIVATION_FUNCTION_MLP, OUTPUT_ACTIVATION_FUNCTION_MLP, 1>; //Final 1 refers to batch size
+using STRUCTURE_SPEC = rlt::nn_models::mlp::StructureSpecification<T, DEVICE::index_t, INPUT_DIM_MLP, OUTPUT_DIM_MLP, NUM_LAYERS, HIDDEN_DIM, ACTIVATION_FUNCTION_MLP, OUTPUT_ACTIVATION_FUNCTION_MLP, BATCH_SIZE>; //Final 1 refers to batch size
 
 using OPTIMIZER_SPEC = rlt::nn::optimizers::adam::Specification<T, TI>;
 using OPTIMIZER = rlt::nn::optimizers::Adam<OPTIMIZER_SPEC>;
