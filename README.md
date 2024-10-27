@@ -8,3 +8,4 @@ Below are some pictures and videos of the pendulum
 https://github.com/user-attachments/assets/0d204ed0-89dc-42aa-81c1-2f68d254fa65
 ![IMG_2317](https://github.com/user-attachments/assets/db64d5bf-d27b-4819-a076-aac5cdce143c)
 
+For the physical pendulum I machined it out of aluminum, using both a lathe and a mill.
