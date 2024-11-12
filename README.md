@@ -1,6 +1,5 @@
 # furutaPendulum
-This is the code for developing a furuta pendulum. Using a pc as a deep rl learning device, and an arduino as a motor controller.
-I was able to get active stabilization around the stabile equilbrium, but obviously unable to get stabilization around the unstable equilibrium.
+This is the code for developing a furuta pendulum. The plan was to use a pc as a deep rl learning device, and an arduino as a motor controller. I ultimately just did pretty basic control logic to get active stabilization around the stabile equilbrium, but obviously unable to get stabilization around the unstable equilibrium.
 
 The way it works is a pendulums hangs from a rotary encoder, which sends is connected to an arduino. The arduino keeps track of the position and sends it via UDP over an ethernet cable to the PC. The PC then implements whichever algorithm I was working on, and sends the amount of steps the stper motor should take. Then the arduino sends that to the stepper motor driver.
 
